@@ -4,17 +4,15 @@ on:
   push:
     branches: ["main"]
 
-# 1. PERMISSIONS: Give the robot keys to the warehouse
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write # <--- Crucial: Allows uploading to GHCR
+      packages: write
 
     steps:
       - name: Checkout Code
@@ -23,8 +21,6 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
 
-      # 2. LOG IN: The robot signs into the registry
-      # GITHUB_TOKEN is a magic password GitHub creates automatically.
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
@@ -32,10 +28,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3. BUILD & PUSH: Build the box and ship it
+      # 🟢 NEW STEP: Convert repo name to lowercase
+      - name: Lowercase Repo Name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
+          # Use the new lowercase variable we just created
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
