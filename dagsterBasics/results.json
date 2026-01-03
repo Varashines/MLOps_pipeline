@@ -1,0 +1,123 @@
+{
+  "metrics": [
+    {
+      "id": "389d65fb2d00b0140fed36faa82e6dc3",
+      "metric_name": "DriftedColumnsCount(drift_share=0.5,method=psi)",
+      "config": {
+        "type": "evidently:metric_v2:DriftedColumnsCount",
+        "drift_share": 0.5,
+        "method": "psi"
+      },
+      "value": { "count": 0.0, "share": 0.0 }
+    },
+    {
+      "id": "54d507f755c808d9e5232d85d26a869f",
+      "metric_name": "ValueDrift(column=amount,method=psi,threshold=0.1)",
+      "config": {
+        "type": "evidently:metric_v2:ValueDrift",
+        "column": "amount",
+        "method": "psi",
+        "threshold": 0.1
+      },
+      "value": 0.09241962407465935
+    },
+    {
+      "id": "e9b9a1f30ff97ee22780c9f8df9889a2",
+      "metric_name": "ValueDrift(column=store_id,method=psi,threshold=0.1)",
+      "config": {
+        "type": "evidently:metric_v2:ValueDrift",
+        "column": "store_id",
+        "method": "psi",
+        "threshold": 0.1
+      },
+      "value": 0.019178804830118742
+    }
+  ],
+  "tests": [
+    {
+      "id": "lt",
+      "name": "Share of Drifted Columns: Less 0.500",
+      "description": "Share of Drifted Columns: Actual value 0.000 < 0.500",
+      "metric_config": {
+        "metric_id": "389d65fb2d00b0140fed36faa82e6dc3",
+        "params": {
+          "type": "evidently:metric_v2:DriftedColumnsCount",
+          "drift_share": 0.5,
+          "method": "psi"
+        }
+      },
+      "test_config": {
+        "type": "evidently:test_v2:LessThanMetricTest",
+        "is_critical": true,
+        "alias": null,
+        "label_filters": null,
+        "threshold": 0.5
+      },
+      "status": "SUCCESS",
+      "bound_test": {
+        "type": "evidently:bound_test:CountBoundTest",
+        "test": {
+          "type": "evidently:test_v2:LessThanMetricTest",
+          "is_critical": true,
+          "alias": null,
+          "label_filters": null,
+          "threshold": 0.5
+        },
+        "metric_fingerprint": "389d65fb2d00b0140fed36faa82e6dc3",
+        "is_count": false
+      }
+    },
+    {
+      "id": "drift",
+      "name": "Value Drift for column amount",
+      "description": "Drift score is 0.09. The drift detection method is PSI. The drift threshold is 0.10.",
+      "metric_config": {
+        "metric_id": "54d507f755c808d9e5232d85d26a869f",
+        "params": {
+          "type": "evidently:metric_v2:ValueDrift",
+          "column": "amount",
+          "method": "psi",
+          "threshold": 0.1
+        }
+      },
+      "test_config": {},
+      "status": "SUCCESS",
+      "bound_test": {
+        "type": "evidently:bound_test:ValueDriftBoundTest",
+        "test": {
+          "type": "evidently:test_v2:ValueDriftTest",
+          "is_critical": true,
+          "alias": null,
+          "label_filters": null
+        },
+        "metric_fingerprint": "54d507f755c808d9e5232d85d26a869f"
+      }
+    },
+    {
+      "id": "drift",
+      "name": "Value Drift for column store_id",
+      "description": "Drift score is 0.02. The drift detection method is PSI. The drift threshold is 0.10.",
+      "metric_config": {
+        "metric_id": "e9b9a1f30ff97ee22780c9f8df9889a2",
+        "params": {
+          "type": "evidently:metric_v2:ValueDrift",
+          "column": "store_id",
+          "method": "psi",
+          "threshold": 0.1
+        }
+      },
+      "test_config": {},
+      "status": "SUCCESS",
+      "bound_test": {
+        "type": "evidently:bound_test:ValueDriftBoundTest",
+        "test": {
+          "type": "evidently:test_v2:ValueDriftTest",
+          "is_critical": true,
+          "alias": null,
+          "label_filters": null
+        },
+        "metric_fingerprint": "e9b9a1f30ff97ee22780c9f8df9889a2"
+      }
+    }
+  ]
+}

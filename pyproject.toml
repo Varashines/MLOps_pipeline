@@ -1,0 +1,13 @@
+[project]
+name = "learning"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dagster>=1.12.8",
+    "dagster-webserver>=1.12.8",
+    "evidently>=0.7.18",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.5",
+]

@@ -1,0 +1,14 @@
+# Ignore the local virtual environment (Crucial!)
+.venv/
+#uv.lock
+
+# Ignore system files
+__pycache__/
+*.pyc
+.DS_Store
+.git/
+.idea/
+vscode/
+
+# Ignore outputs
+#incoming_data/
