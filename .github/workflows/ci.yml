@@ -1,0 +1,39 @@
+name: MLOps Pipeline CI
+
+# 1. THE TRIGGER: When should this run?
+# We want it to run on every "push" to the "main" branch.
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+# 2. THE JOBS: What should the robot do?
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest # The cloud computer (Linux)
+
+    steps:
+      # A. Check out your code (download it to the runner)
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # B. Set up uv (The same tool you use locally!)
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      # C. Validate Python Environment
+      # This ensures your uv.lock is valid and packages can install
+      - name: Install Dependencies
+        run: uv sync --frozen
+
+      # D. Smoke Test (Optional but recommended)
+      # Check if the code has syntax errors without running the full pipeline
+      - name: Check Syntax
+        run: uv run python -m compileall dagsterBasics/
+
+      # E. Build the Container
+      # Note: GitHub Actions uses standard Docker, not Podman.
+      # But since they share the Dockerfile format, it works perfectly.
+      - name: Build Docker Image
+        run: docker build -t mlops-pipeline .
