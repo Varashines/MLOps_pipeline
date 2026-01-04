@@ -11,3 +11,11 @@ dependencies = [
     "pandas>=2.3.3",
     "pydantic>=2.12.5",
 ]
+
+[tool.dg]
+directory_type = "project"
+
+[tool.dg.project]
+root_module = "dagsterBasics"
+# This tells dg to look for 'defs' inside session2.py
+code_location_target_module = "dagsterBasics.session2"

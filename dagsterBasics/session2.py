@@ -4,7 +4,6 @@ import sys
 
 import pandas as pd
 from dagster import (
-    DefaultSensorStatus,
     Definitions,
     Output,
     RunRequest,

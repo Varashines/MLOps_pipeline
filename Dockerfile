@@ -1,42 +1,32 @@
-# ==========================================
-# STAGE 1: The Builder (Compiles the Environment)
-# ==========================================
+# --- STAGE 1: Builder ---
 FROM python:3.13-slim AS builder
 
-# 1. Install uv binary
+# Install uv (The fastest Python package manager)
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-# 2. Copy ONLY dependency files first
-# This is crucial for Docker caching. If pyproject.toml doesn't change,
-# Docker skips the "uv sync" step on re-builds.
+# Install dependencies first for better layer caching
 COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
 
-# 3. Install dependencies into .venv
-# --frozen: Fails if lockfile is out of date (Safety)
-# --no-install-project: Installs libs but skips installing 'your' code package
-RUN uv sync --frozen --no-install-project
-
-# ==========================================
-# STAGE 2: The Runner (Execution)
-# ==========================================
+# --- STAGE 2: Runner ---
+# This is the small, clean image with NO uv binary
 FROM python:3.13-slim
 
 WORKDIR /app
 
-# 1. Copy the Virtual Environment from builder
+# Copy only the virtual environment from the builder
 COPY --from=builder /app/.venv /app/.venv
 
-# 2. Add venv to PATH
-# Now 'python' and 'dagster' commands work automatically
-ENV PATH="/app/.venv/bin:$PATH"
-
-# 3. Copy your actual code
-# We do this LAST so code changes don't invalidate the cache
+# Copy your application code
 COPY . .
 
-# 4. Run Dagster
-# We point to the specific file you are working on
+# Add the venv binaries to the PATH so 'dagster' is recognized directly
+ENV PATH="/app/.venv/bin:$PATH"
 ENV DAGSTER_HOME=/app
-CMD ["dagster", "dev", "-h", "0.0.0.0", "-p", "3000", "-f", "dagsterBasics/session2.py"]
+
+EXPOSE 3000
+
+# Run using the python-managed binary directly
+CMD ["dg", "dev", "-h", "0.0.0.0", "-p", "3000"]
