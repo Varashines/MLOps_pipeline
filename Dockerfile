@@ -1,32 +1,46 @@
 # --- STAGE 1: Builder ---
 FROM python:3.13-slim AS builder
 
-# Install uv (The fastest Python package manager)
+# 1. Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
+# 2. Optimization: Enable bytecode compilation for faster app startup
+ENV UV_COMPILE_BYTECODE=0
+# Optimization: Ensure uv copies files into the venv instead of symlinking
+ENV UV_LINK_MODE=copy
+
 WORKDIR /app
 
-# Install dependencies first for better layer caching
-COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-install-project --no-dev
+# 3. Optimization: Use BuildKit cache mounts to persist uv's cache between builds
+# This means if you add ONE package, it doesn't re-download the others
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
 
 # --- STAGE 2: Runner ---
-# This is the small, clean image with NO uv binary
 FROM python:3.13-slim
+
+# 4. Security: Create a non-root user (Standard best practice)
+RUN groupadd -g 1001 appgroup && \
+    useradd -u 1001 -g appgroup -m -d /app -s /bin/false appuser
 
 WORKDIR /app
 
-# Copy only the virtual environment from the builder
-COPY --from=builder /app/.venv /app/.venv
+# Copy only the venv from builder
+COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
 
-# Copy your application code
-COPY . .
+# Copy code and set ownership
+COPY --chown=appuser:appgroup . .
 
-# Add the venv binaries to the PATH so 'dagster' is recognized directly
+# Environment setup
 ENV PATH="/app/.venv/bin:$PATH"
 ENV DAGSTER_HOME=/app
+ENV PYTHONUNBUFFERED=1
+
+# 5. Security: Switch to the non-root user
+USER appuser
 
 EXPOSE 3000
 
-# Run using the python-managed binary directly
 CMD ["dg", "dev", "-h", "0.0.0.0", "-p", "3000"]
