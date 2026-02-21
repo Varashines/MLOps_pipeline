@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "dagster>=1.12.8",
+    "dagster-dg-cli>=1.12.8",
     "dagster-webserver>=1.12.8",
     "evidently>=0.7.18",
     "pandas>=2.3.3",
@@ -14,8 +15,9 @@ dependencies = [
 
 [tool.dg]
 directory_type = "project"
+cli.suppress_warnings = ["project_and_activated_venv_mismatch"]
 
 [tool.dg.project]
-root_module = "dagsterBasics"
-# This tells dg to look for 'defs' inside session2.py
-code_location_target_module = "dagsterBasics.session2"
+root_module = "orchestration"
+# This points to the definitions.py file we are about to create
+code_location_target_module = "orchestration.definitions"

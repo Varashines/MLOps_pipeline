@@ -4,14 +4,12 @@ import sys
 
 import pandas as pd
 from dagster import (
-    Definitions,
     Output,
     RunRequest,
     ScheduleDefinition,
     SkipReason,
     asset,
     define_asset_job,
-    load_assets_from_modules,
     sensor,
 )
 
@@ -177,12 +175,3 @@ def new_file_sensor(context):
         )
 
     return SkipReason("No new files found")
-
-
-# --- UPDATE THE DEFINITIONS ---
-defs = Definitions(
-    assets=load_assets_from_modules([current_module]),
-    jobs=[daily_quality_check_job],
-    schedules=[daily_schedule],
-    sensors=[new_file_sensor],  # <--- Added the sensor here
-)

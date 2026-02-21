@@ -5,7 +5,7 @@ FROM python:3.13-slim AS builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # 2. Optimization: Enable bytecode compilation for faster app startup
-ENV UV_COMPILE_BYTECODE=0
+ENV UV_COMPILE_BYTECODE=1
 # Optimization: Ensure uv copies files into the venv instead of symlinking
 ENV UV_LINK_MODE=copy
 
@@ -33,8 +33,12 @@ COPY --from=builder --chown=appuser:appgroup /app/.venv /app/.venv
 # Copy code and set ownership
 COPY --chown=appuser:appgroup . .
 
+# Add this to your Stage 2
+COPY dagster.yaml /app/dagster.yaml
+
 # Environment setup
 ENV PATH="/app/.venv/bin:$PATH"
+ENV VIRTUAL_ENV="/app/.venv"
 ENV DAGSTER_HOME=/app
 ENV PYTHONUNBUFFERED=1
 
